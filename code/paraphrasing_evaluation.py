@@ -80,7 +80,7 @@ if __name__ == "__main__":
     parser.add_argument("api_key", type=str, help="API key for the chosen service")
     parser.add_argument("service_choice", choices=["together", "cohere"], help="Service choice: 'together' or 'cohere'")
     parser.add_argument("model_name", type=str, help="Model name for the chosen service")
-    parser.add_argument("dataset_range", type=int, help="The number of dataset items to infer on")
+    parser.add_argument("dataset_range", type=int, help="The number of dataset items to infer on (max 23k items)")
     args = parser.parse_args()
 
     main(args.api_key, args.service_choice, args.model_name, args.dataset_range)
