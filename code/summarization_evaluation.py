@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Bengali Summary Evaluation Script with ROUGE-2 Scoring
+Summary Evaluation Script with Command Line Arguments
 """
 
 
