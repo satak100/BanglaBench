@@ -1,4 +1,4 @@
-Authors' implementation of *Too Late to Train, Too Early To Use? A Study on Necessity and Viability of Low-Resource Bengali LLMs*
+Authors' implementation of **Too Late to Train, Too Early To Use? A Study on Necessity and Viability of Low-Resource Bengali LLMs**
 
 ### 📄 [Paper Link](https://arxiv.org/pdf/2407.00416)  
 # BanglaBench: A Study on Necessity and Viability of Low-Resource Bengali LLMs
