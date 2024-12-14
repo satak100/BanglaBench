@@ -12,33 +12,12 @@ import cohere
 from tqdm import tqdm
 import time
 from rouge_score import rouge_scorer
+from utils import generate_content_together, generate_content_aya, extract_summary
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 instruct_prompt = "Please write a one-sentence Bengali summary/TL;DR of the given Bengali article. The summary must not be longer than a sentence and must be in Bengali. Just return the summary without any preamble, quotations, or explanations."
-def generate_content_together(client, input_text, model_name):
-    response = client.chat.completions.create(
-        messages=[
-            {"role": "system", "content": instruct_prompt},
-            {"role": "user", "content": input_text},
-        ],
-        model=model_name
-    )
-    return response.choices[0].message.content
-
-def generate_content_aya(client, input_text, model_name):
-    response = client.chat(
-        model=model_name,
-        message= instruct_prompt+ "\n\n" + input_text
-    )
-    return response.text
-
-def extract_summary(input_text):
-  if "\n\n" in input_text:
-    return input_text.split("\n\n")[1]
-  else:
-    return input_text
 
 scorer = rouge_scorer.RougeScorer(['rouge2', ], use_stemmer=True, lang="bengali")
 
@@ -54,7 +33,7 @@ def main(api_key, service_choice, model_name, dataset_range):
         logging.info("Evaluating using Together API.")
         for data in tqdm(dataset["test"].select(range(dataset_range))):
             input_text = data["text"]
-            response = generate_content_together(client, input_text, model_name)
+            response = generate_content_together(client, instruct_prompt, input_text, model_name)
             response = extract_summary(response)
             target_text = data["summary"]
             rouge = scorer.score(target_text, response)['rouge2'].fmeasure
@@ -65,7 +44,7 @@ def main(api_key, service_choice, model_name, dataset_range):
         logging.info("Evaluating using Cohere API.")
         for data in tqdm(dataset["test"].select(range(dataset_range))):
             input_text = data["text"]
-            response = generate_content_aya(client, input_text, model_name)
+            response = generate_content_aya(client, instruct_prompt, input_text, model_name)
             response = extract_summary(response)
             target_text = data["summary"]
             rouge = scorer.score(target_text, response)['rouge2'].fmeasure

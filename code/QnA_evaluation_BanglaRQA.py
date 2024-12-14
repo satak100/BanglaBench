@@ -12,6 +12,7 @@ from datasets import load_dataset
 from together import Together
 from normalizer import normalize
 from evaluate import load as load_metric
+from utils import generate_content_together
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -47,16 +48,6 @@ def extract_json(response):
             "question_type": "extractive",
             "answer": "<NOT_IN_CONTEXT>"
         }
-
-def generate_content_together(client, input_text, model_name):
-    response = client.chat.completions.create(
-        messages=[
-            {"role": "system", "content": llama3system},
-            {"role": "user", "content": input_text},
-        ],
-        model=model_name
-    )
-    return response.choices[0].message.content
 
 def evaluate_responses(dataset, answers):
     predictions = []
@@ -106,13 +97,13 @@ def main(api_key, model_name):
 
     for data in tqdm(dataset["test"], desc="Generating answers"):
         input_text = template.format(data["context"], data["question_text"])
-        response = generate_content_together(client, input_text, model_name)
+        response = generate_content_together(client, llama3system, input_text, model_name)
 
         try:
             extracted_response = extract_json(response)
         except Exception:
             logging.warning(f"Retrying failed response: {response}")
-            response = generate_content_together(client, input_text, model_name)
+            response = generate_content_together(client, llama3system, input_text, model_name)
             extracted_response = extract_json(response)
 
         answers.append(extracted_response)

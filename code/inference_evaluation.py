@@ -12,29 +12,13 @@ import cohere
 from tqdm import tqdm
 import time
 import re
+from utils import generate_content_together, generate_content_aya
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 instruct_prompt = """You will be given two sentences. Please determine whether the first sentence entails, contradicts, or is neutral to the second. Pay close attention to each word as you analyze the relation between the two sentences. Respond in the format: 
 Thought: {thought on if the first second entails, contradicts, or is neutral to the second sentence}\n\nVerdict: {any one of <entailment>, <contradiction> or <neutral> tags}"""
-
-def generate_content_together(client, input_text, model_name):
-    response = client.chat.completions.create(
-        messages=[
-            {"role": "system", "content": instruct_prompt},
-            {"role": "user", "content": input_text},
-        ],
-        model=model_name
-    )
-    return response.choices[0].message.content
-
-def generate_content_aya(client, input_text, model_name):
-    response = client.chat(
-        model=model_name,
-        message= instruct_prompt+ "\n\n" + input_text
-    )
-    return response.text
 
 def main(api_key, service_choice, model_name, dataset_range):  
     dataset = load_dataset("csebuetnlp/xnli_bn")
@@ -48,7 +32,7 @@ def main(api_key, service_choice, model_name, dataset_range):
         logging.info("Evaluating using Together API.")
         for data in tqdm(dataset["test"].select(range(dataset_range))):
             input_text = "Sentence 1 : " + data["sentence1"] + "\n\nSentence 2: " + data['sentence2']
-            response = generate_content_together(client, input_text, model_name).split()[-1]
+            response = generate_content_together(client, instruct_prompt, input_text, model_name).split()[-1]
             if bool(re.search(r"contradiction", response, re.IGNORECASE)):
               response = 0
             elif bool(re.search(r"entailment", response, re.IGNORECASE)):
@@ -65,7 +49,7 @@ def main(api_key, service_choice, model_name, dataset_range):
         logging.info("Evaluating using Cohere API.")
         for data in tqdm(dataset["test"].select(range(dataset_range))):
             input_text = "Sentence 1 : " + data["sentence1"] + "\n\nSentence 2: " + data['sentence2']
-            response = generate_content_aya(client, input_text, model_name).split()[-1]
+            response = generate_content_aya(client, instruct_prompt, input_text, model_name).split()[-1]
             if bool(re.search(r"contradiction", response, re.IGNORECASE)):
               response = 0
             elif bool(re.search(r"entailment", response, re.IGNORECASE)):

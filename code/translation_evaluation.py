@@ -12,34 +12,12 @@ import cohere
 from tqdm import tqdm
 import sacrebleu
 import time
+from utils import generate_content_together, generate_content_aya, calculate_sacrebleu
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 instruct_prompt = "You are a state-of-the-art AI assistant that translates sentences from Bengali to English. Just return the translation without any preamble, quotations or explanations."
-# Define the template for generating translations with Together API
-def generate_content_together(client, input_text, model_name):
-    response = client.chat.completions.create(
-        messages=[
-            {"role": "system", "content": instruct_prompt},
-            {"role": "user", "content": input_text},
-        ],
-        model=model_name
-    )
-    return response.choices[0].message.content
-
-def generate_content_aya(client, input_text, model_name):
-    response = client.chat(
-        model=model_name,
-        message= instruct_prompt+ "\n\n" + input_text
-    )
-    return response.text
-
-def calculate_sacrebleu(reference_sentence, candidate_sentence):
-    reference = [[reference_sentence]]
-    candidate = [candidate_sentence]
-    sbleu = sacrebleu.corpus_bleu(candidate, reference)
-    return sbleu.score
 
 def main(api_key, service_choice, model_name):  
     dataset = load_dataset("csebuetnlp/BanglaNMT")
@@ -53,7 +31,7 @@ def main(api_key, service_choice, model_name):
         logging.info("Evaluating using Together API.")
         for data in tqdm(dataset["test"]):
             input_text = data["bn"]
-            response = generate_content_together(client, input_text, model_name)
+            response = generate_content_together(client, instruct_prompt, input_text, model_name)
             target_text = data["en"]
             sbleu = calculate_sacrebleu(target_text, response)
             bleu_scores.append(sbleu)
@@ -63,7 +41,7 @@ def main(api_key, service_choice, model_name):
         logging.info("Evaluating using Cohere API.")
         for data in tqdm(dataset["test"]):
             input_text = data["bn"]
-            response = generate_content_aya(client, input_text, model_name)
+            response = generate_content_aya(client, instruct_prompt, input_text, model_name)
             target_text = data["en"]
             sbleu = calculate_sacrebleu(target_text, response)
             bleu_scores.append(sbleu)

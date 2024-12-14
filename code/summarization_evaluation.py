@@ -13,6 +13,7 @@ import cohere
 from transformers import AutoTokenizer
 from tqdm import tqdm
 from rouge_score import rouge_scorer
+from utils import generate_content_together, generate_content_aya, extract_summary
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -27,26 +28,6 @@ def truncate_long_articles(example, tokenizer):
         example["text"] = tokenizer.decode(tokens[:UPPER_LIMIT], skip_special_tokens=True)
     return example
 
-def generate_content_together(client, input_text, model_name):
-    response = client.chat.completions.create(
-        messages=[
-            {"role": "system", "content": instruct_prompt},
-            {"role": "user", "content": input_text},
-        ],
-        model=model_name
-    )
-    return response.choices[0].message.content
-
-def generate_content_cohere(client, input_text, model_name):
-    response = client.chat(
-        model=model_name,
-        message=instruct_prompt +"\n\n" + input_text
-    )
-    return response.text
-
-def extract_summary(input_text):
-    return input_text.split("\n\n")[1] if "\n\n" in input_text else input_text
-
 def main(api_key, service_choice, model_name):
     ds = load_dataset("csebuetnlp/CrossSum", "english-bengali")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -54,10 +35,10 @@ def main(api_key, service_choice, model_name):
     if service_choice == "together":
         os.environ["TOGETHER_API_KEY"] = api_key
         client = Together(api_key=api_key)
-        generate_content = lambda input_text: generate_content_together(client, input_text, model_name)
+        generate_content = lambda input_text: generate_content_together(client, instruct_prompt, input_text, model_name)
     elif service_choice == "cohere":
         client = cohere.Client(api_key)
-        generate_content = lambda input_text: generate_content_cohere(client, input_text, model_name)
+        generate_content = lambda input_text: generate_content_aya(client, instruct_prompt, input_text, model_name)
     else:
         logging.error("Invalid service choice. Please select either 'together' or 'cohere'.")
         return
