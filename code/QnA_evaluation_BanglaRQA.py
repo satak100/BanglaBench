@@ -113,8 +113,8 @@ def main(api_key, model_name):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate Bengali question-answering models using Together API.")
-    parser.add_argument("--api_key", type=str, required=True, help="API key for Together API")
-    parser.add_argument("--model_name", type=str, required=True, help="Model name for Together API")
+    parser.add_argument("api_key", type=str, help="API key for Together API")
+    parser.add_argument("model_name", type=str, help="Model name for Together API")
     args = parser.parse_args()
 
     main(args.api_key, args.model_name)

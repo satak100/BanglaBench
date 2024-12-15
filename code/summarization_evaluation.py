@@ -77,9 +77,9 @@ def main(api_key, service_choice, model_name):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate Bengali summaries from English articles and evaluate using ROUGE-2.")
-    parser.add_argument("--api_key", type=str, required=True, help="API key for the chosen service")
-    parser.add_argument("--service_choice", choices=["together", "cohere"], required=True, help="Service choice: 'together' or 'cohere'")
-    parser.add_argument("--model_name", type=str, required=True, help="Model name for tokenizer and chosen API service")
+    parser.add_argument("api_key", type=str, help="API key for the chosen service")
+    parser.add_argument("service_choice", choices=["together", "cohere"], help="Service choice: 'together' or 'cohere'")
+    parser.add_argument("model_name", type=str, help="Model name for tokenizer and chosen API service")
     args = parser.parse_args()
 
     main(args.api_key, args.service_choice, args.model_name)
