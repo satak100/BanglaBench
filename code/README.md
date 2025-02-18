@@ -17,7 +17,7 @@ python translation_evaluation.py your_api_key cohere c4ai-aya-expanse-32
 Directives available in `monolingual_summarization` directory
 
 ## Crosslingual Summarization
-Run the script `summarization_evaluation.py` by specifying the API key, service choice and model name.
+Run the script `summarization_evaluation.py` by specifying the API key , service choice and model name.
 
 ```
 python summarization_evaluation.py your_api_key cohere c4ai-aya-expanse-32
